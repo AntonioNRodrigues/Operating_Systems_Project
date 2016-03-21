@@ -1,8 +1,9 @@
 /**
  * Encapsulates the POSIX semaphore API.
  *
- * Pedro Mariano plmariano@ciencias.ulisboa.pt
+ * Pedro Mariano plmariano@fc.ul.pt
  */
+
 #ifndef __SEMAPHORE__
 #define __SEMAPHORE__
 

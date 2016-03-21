@@ -1,7 +1,7 @@
 /**
  * Encapsulates the POSIX shared object API.
  *
- * @author Pedro Mariano plmariano@ciencias.ulisboa.pt
+ * Pedro Mariano plmariano@fc.ul.pt
  */
 
 #ifndef __SHARED__

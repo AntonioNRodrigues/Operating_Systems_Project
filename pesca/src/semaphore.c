@@ -20,6 +20,7 @@ sem_t *semInit (const char *name, int value)
 sem_t *semAccess (const char *name)
 {
 	sem_t *result;
+	/* result = sem_open (name, 0, S_IRUSR | S_IWUSR); */
 	result = sem_open (name, 0);
 	if (result == SEM_FAILED) {
 		perror (name);
