@@ -36,10 +36,36 @@ static void iniciar_cardume (Cardume *cardume)
 
 void iniciar_cardumes ()
 {
-	/* Criar a memória partilhada para os cardumes */
-	//INSERIR CÓDIGO
-	/* Inicializar a memória partilhada dos cardumes */
-	//INSERIR CÓDIGO
+
+	/* Criar a memória partilhada para os barcos */
+	//retorna um discritor de um ficheiro
+	int fd = shm_open("/cardume", O_RDWR|O_CREAT,S_IRUSR|S_IWUSR);
+
+	if(fd == -1){
+		perror("shm");
+		exit(1);
+	}else{
+		printf("Memoria partilhada-->Cardume criada %d\n", fd);
+	}
+
+	int ret = ftruncate(fd, (sizeof(cardume) * num_cardumes));
+	if (ret == -1){
+		perror("shm");
+		exit(2);
+	}else{
+		printf("O espaco-->Cardume foi criado %d\n", ret);
+
+	/* Inicializar a memória partilhada dos barcos */
+	int i;
+
+	cardumes = mmap(0, (sizeof(Cardume) * num_cardumes), PROT_WRITE|PROT_READ, MAP_SHARED, fd, 0);
+
+	if (cardumes==MAP_FAILED){
+		perror("shm-mmap");
+		exit(3);
+	}else{
+		printf("O espaço de memoria foi criado e associado ah variavel cardumes");
+	}
 }
 
 void destruir_cardumes ()

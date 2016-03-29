@@ -5,6 +5,13 @@
 #include <stdbool.h>
 #include <stdlib.h>
 
+#include <sys/mman.h>
+#include <sys/stat.h>        
+#include <fcntl.h>  
+
+#include <unistd.h>
+#include <sys/types.h>
+
 #include "barco.h"
 #include "mundo.h"
 #include "cardume.h"
@@ -43,10 +50,36 @@ static void iniciar_barco (Barco *barco)
 void iniciar_barcos ()
 {
 	/* Criar a memória partilhada para os barcos */
-	//INSERIR CÓDIGO
+	sharedInit();
+	//retorna um discritor de um ficheiro
+	int fd = shm_open("/barcos", O_RDWR|O_CREAT,S_IRUSR|S_IWUSR);
+
+	if(fd == -1){
+		perror("shm");
+		exit(1);
+	}else{
+		printf("Memoria partilhada--> Barco criada %d\n", fd);
+	}
+
+	int ret = ftruncate(fd, (sizeof(Barco) * num_barcos));
+	if (ret == -1){
+		perror("shm");
+		exit(2);
+	}else{
+		printf("Espaco--> Barco criado %d\n", ret);
+
 	/* Inicializar a memória partilhada dos barcos */
 	int i;
-	//INSERIR CÓDIGO
+
+	barcos = mmap(0, (sizeof(Barco) * num_barcos), PROT_WRITE|PROT_READ, MAP_SHARED, fd, 0);
+
+	if (barcos == MAP_FAILED){
+		perror("shm-mmap");
+		exit(3);
+	}else{
+		printf("O espaço de memoria foi criado e associado ah variavel cardumes");
+	}
+	
 }
 
 void destruir_barcos ()
