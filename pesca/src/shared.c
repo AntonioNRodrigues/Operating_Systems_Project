@@ -18,16 +18,19 @@ void *sharedInit (const char *name, size_t size)
 		perror (name);
 		exit (1);
 	}
+	printf("sharedInit:::shm_open:: name= %s %d\n", name, size);
 	ret = ftruncate (fd, size);
 	if (ret == -1) {
 		perror (name);
 		exit (1);
 	}
+	printf("sharedInit:::ftruncate:: name= %s %d\n", name, size);
 	result = mmap (0, size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
 	if (result == MAP_FAILED) {
 		perror (name);
 		exit (1);
 	}
+	printf("sharedInit:::mmap:: name= %s %d\n", name, size);
 	return result;
 }
 
