@@ -18,7 +18,7 @@ void iniciar_mundo ()
 {
 	int i, x, y;
 	/* Criar a memória partilhada para o mundo */
-	//INSERIR CÓDIGO
+	mundo = (Mundo *) sharedInit("jundo", sizeof(Mundo));
 	/* Inicializar a memória partilhada do mundo */
 	mundo->estado_capitao = C_PLANEAR;
 	for (x = 0; x < DIMENSAO_MAR; x++) {
@@ -36,7 +36,7 @@ void iniciar_mundo ()
 
 void destruir_mundo ()
 {
-	//INSERIR CÓDIGO
+	sharedDestroy("/mundo", &mundo, sizeof(Mundo));
 }
 
 int barco_posicao_mundo (const Posicao *p)

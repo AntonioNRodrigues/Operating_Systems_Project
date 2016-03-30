@@ -45,17 +45,20 @@ static void iniciar_barco (Barco *barco)
 	barco->destino = NIL_POS;
 	barco->posicao = NIL_POS;
 	barco->peixe_pescado = 0;
+	printf("%d\n", barco->peixe_pescado);
 }
 
 void iniciar_barcos ()
 {
+	printf("iniciar_barcos::::\n");
 	/* Criar a memória partilhada para os barcos */
 	barcos = (Barco *) sharedInit("/barcos", sizeof(Barco) * num_barcos);
+	printf("iniciar_barcos:::: barcos=%s\n", barcos);
 	/* Inicializar a memória partilhada dos barcos */
 	int i;
-	//INSERIR CÓDIGO
 	for (i = 0; i < num_barcos; i++){
 		iniciar_barco(&barcos[i]);
+		printf("iniciar_barcos:cicloFor:: %d :::sizeBarcos %d \n", barcos[i].peixe_pescado, i+1);
 	}
 
 }
