@@ -50,41 +50,19 @@ static void iniciar_barco (Barco *barco)
 void iniciar_barcos ()
 {
 	/* Criar a memória partilhada para os barcos */
-	sharedInit();
-	//retorna um discritor de um ficheiro
-	int fd = shm_open("/barcos", O_RDWR|O_CREAT,S_IRUSR|S_IWUSR);
-
-	if(fd == -1){
-		perror("shm");
-		exit(1);
-	}else{
-		printf("Memoria partilhada--> Barco criada %d\n", fd);
-	}
-
-	int ret = ftruncate(fd, (sizeof(Barco) * num_barcos));
-	if (ret == -1){
-		perror("shm");
-		exit(2);
-	}else{
-		printf("Espaco--> Barco criado %d\n", ret);
-
+	barcos = (Barco *) sharedInit("/barcos", sizeof(Barco) * num_barcos);
 	/* Inicializar a memória partilhada dos barcos */
 	int i;
-
-	barcos = mmap(0, (sizeof(Barco) * num_barcos), PROT_WRITE|PROT_READ, MAP_SHARED, fd, 0);
-
-	if (barcos == MAP_FAILED){
-		perror("shm-mmap");
-		exit(3);
-	}else{
-		printf("O espaço de memoria foi criado e associado ah variavel cardumes");
+	//INSERIR CÓDIGO
+	for (i = 0; i < num_barcos; i++){
+		iniciar_barco(&barcos[i]);
 	}
-	
+
 }
 
 void destruir_barcos ()
 {
-	//INSERIR CÓDIGO
+	sharedDestroy("/barcos", &barcos, sizeof(Barco)*num_barcos);
 }
 
 void imprimir_barco (FILE *ficheiro, const Barco *barco)
