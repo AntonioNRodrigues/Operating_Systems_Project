@@ -45,7 +45,6 @@ static void iniciar_barco (Barco *barco)
 	barco->destino = NIL_POS;
 	barco->posicao = NIL_POS;
 	barco->peixe_pescado = 0;
-	printf("%d\n", barco->peixe_pescado);
 }
 
 void iniciar_barcos ()
@@ -85,6 +84,7 @@ void imprimir_barco (FILE *ficheiro, const Barco *barco)
 
 void main_barco (int id)
 {
+	printf("-->%d\n", id);
 	bool fim = false;
 	while (!fim) {
 		switch (ordem_capitao (id)) {
