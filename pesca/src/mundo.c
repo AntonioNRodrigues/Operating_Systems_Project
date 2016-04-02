@@ -18,13 +18,14 @@ void iniciar_mundo ()
 {
 	int i, x, y;
 	/* Criar a memória partilhada para o mundo */
-	mundo = (Mundo *) sharedInit("jundo", sizeof(Mundo));
+	mundo = (Mundo *) sharedInit("/mundo", sizeof(Mundo));
 	/* Inicializar a memória partilhada do mundo */
 	mundo->estado_capitao = C_PLANEAR;
 	for (x = 0; x < DIMENSAO_MAR; x++) {
 		for (y = 0; y < DIMENSAO_MAR; y++) {
 			mundo->mar [x][y].barco = VAZIO;
 			mundo->mar [x][y].cardume = VAZIO;
+			printf("%d\n", mundo->mar [x][y]);
 		}
 	}
 	mundo->hora_regressar = 0;
@@ -36,7 +37,7 @@ void iniciar_mundo ()
 
 void destruir_mundo ()
 {
-	sharedDestroy("/mundo", &mundo, sizeof(Mundo));
+	sharedDestroy("/m", &mundo, sizeof(Mundo));
 }
 
 int barco_posicao_mundo (const Posicao *p)
