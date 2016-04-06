@@ -6,12 +6,16 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <stdio.h>
+#include <string.h>
 
 #include "capitao.h"
 #include "barco.h"
 #include "cardume.h"
 #include "mundo.h"
 #include "semaphore.h"
+
+
+#define NUM_CAPITAO 1
 
 static void criar_processos (pid_t *pid_filhos);
 static void esperar_processos (const pid_t *pid_filhos);
@@ -20,11 +24,14 @@ static bool tratar_saida_retorno_filho (int status);
 
 int main (int argc, char *argv[])
 {
+
 	pid_t *pid_filhos;
 	processa_parametros (argc, argv);
 	/* criar memória dinâmica para pid_filhos */
-	pid_filhos = (pid_t *) malloc(sizeof(pid_t) * num_barcos+num_cardumes+1);
-
+	pid_filhos = (pid_t *) malloc(sizeof(pid_t) * (num_barcos+num_cardumes+NUM_CAPITAO));
+	if(pid_filhos == NULL){
+		exit(-1);
+	}
 	iniciar_mundo ();
 	iniciar_barcos ();
 	iniciar_cardumes ();
@@ -50,17 +57,26 @@ void forkCalls(int quant, pid_t *pid_filhos, char *name){
 		if(pid_filho == -1)
 			exit(-1);
 		else{
-			if (pid_filho == 0)
+			if (pid_filho == 0){
+				if(strcmp(name, "barco"))
+					main_barco(i);
+				if(strcmp(name, "cardume"))
+					main_cardume(i);
+				else{
+					main_capitao(i);
+				}
 				exit(0);
+			}
 			else{
 				pid_filhos[i] = pid_filho;
-				quant == 1 ? 
+				quant == NUM_CAPITAO ? 
 					printf("Lancou o processo filho (PID=%d) para o %s\n", pid_filhos[i], name):
 					printf("Lancou o processo filho (PID=%d) para o %s %d\n", pid_filhos[i], name, i);				
 			}
 		}
 	}
 }
+
 void criar_processos (pid_t *pid_filhos){
 	/*lancar processos para os barcos*/
 	forkCalls(num_barcos, pid_filhos, "barco");
@@ -70,14 +86,24 @@ void criar_processos (pid_t *pid_filhos){
 	forkCalls(1, pid_filhos, "capitao");
 }
 
-void esperar_processos (const pid_t *pid_filhos)
-{
-	int i, status;
+void esperar_processos (const pid_t *pid_filhos){
+	int i, status, pid;
 	int terminados = 0;
-	for (i=0; i<num_barcos+num_cardumes+1; i++){
-		waitpid(pid_filhos[i], &status, 0);
-		printf("Processo filho para o cardume %d, %s\n", i, tratar_saida_retorno_filho(status));
+	while(terminados < NUM_CAPITAO+num_barcos+num_cardumes){
+		pid =  wait(&status);
 
+		for(i=0; i<NUM_CAPITAO+num_cardumes+num_barcos; i++){
+			if(pid == pid_filhos[i]){
+				if(i<num_barcos)
+					printf("Processo filho para (PID=%d) para o barco %d", pid, i%num_barcos);
+				if(i>=num_barcos && i<num_cardumes+num_barcos)
+					printf("Processo filho para (PID=%d) para o cardume %d", pid, i-num_barcos%num_cardumes);
+				if(i>num_cardumes+num_barcos)
+					printf("Processo filho para (PID=%d) para o capitao", pid);
+			}
+		}
+		if(tratar_saida_retorno_filho(status))
+			terminados++;
 	}
 }
 
@@ -105,10 +131,9 @@ bool tratar_saida_retorno_filho (int status){
 void tratar_sinal (int sinal)
 {
 	printf ("Rotina de atendimento de sinal\n");
-	//INSERIR CÓDIGO
+	printf("-----------%d\n", getpid());
 }
 
-void instalar_rotina_atendimento_sinal ()
-{
-	//INSERIR CÓDIGO
+void instalar_rotina_atendimento_sinal (){
+	signal(SIGINT, tratar_sinal);
 }
