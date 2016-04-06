@@ -25,7 +25,6 @@ void iniciar_mundo ()
 		for (y = 0; y < DIMENSAO_MAR; y++) {
 			mundo->mar [x][y].barco = VAZIO;
 			mundo->mar [x][y].cardume = VAZIO;
-			printf("%d\n", mundo->mar [x][y]);
 		}
 	}
 	mundo->hora_regressar = 0;
@@ -37,7 +36,7 @@ void iniciar_mundo ()
 
 void destruir_mundo ()
 {
-	sharedDestroy("/m", &mundo, sizeof(Mundo));
+	sharedDestroy("/mundo", mundo, sizeof(Mundo));
 }
 
 int barco_posicao_mundo (const Posicao *p)

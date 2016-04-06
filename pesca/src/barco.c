@@ -49,22 +49,18 @@ static void iniciar_barco (Barco *barco)
 
 void iniciar_barcos ()
 {
-	printf("iniciar_barcos::::\n");
 	/* Criar a memória partilhada para os barcos */
 	barcos = (Barco *) sharedInit("/barcos", sizeof(Barco) * num_barcos);
-	printf("iniciar_barcos:::: barcos=%s\n", barcos);
 	/* Inicializar a memória partilhada dos barcos */
 	int i;
 	for (i = 0; i < num_barcos; i++){
 		iniciar_barco(&barcos[i]);
-		printf("iniciar_barcos:cicloFor:: %d :::sizeBarcos %d \n", barcos[i].peixe_pescado, i+1);
 	}
 
 }
 
-void destruir_barcos ()
-{
-	sharedDestroy("/barcos", &barcos, sizeof(Barco)*num_barcos);
+void destruir_barcos (){
+	sharedDestroy("/barcos", barcos, sizeof(Barco)*num_barcos);
 }
 
 void imprimir_barco (FILE *ficheiro, const Barco *barco)
@@ -84,8 +80,7 @@ void imprimir_barco (FILE *ficheiro, const Barco *barco)
 
 void main_barco (int id)
 {
-	printf("-->%d\n", id);
-	bool fim = false;
+	bool fim = true;
 	while (!fim) {
 		switch (ordem_capitao (id)) {
 		case O_PESCAR:

@@ -34,24 +34,21 @@ static void iniciar_cardume (Cardume *cardume)
 	cardume->posicao.y = y;
 }
 
-void iniciar_cardumes ()
-{
+void iniciar_cardumes (){
 
-	printf("iniciar_cardumes::::\n");
 /* Criar a memória partilhada para os cardumes */
 	cardumes = (Cardume *) sharedInit("/cardume", sizeof (Cardume) * num_cardumes);
 	
 /* Inicializar a memória partilhada dos cardumes */
 	int i;
 	for (int i = 0; i < num_cardumes; i++){
-		iniciar_cardume(&cardumes[i]);	
-		printf("iniciar_cardumes:cicloFor:: %d :::sizeCardumes %d \n", cardumes[i].posicao.x, i+1);
+		iniciar_cardume(&cardumes[i]);
 	}
 
 }
 
 void destruir_cardumes (){
-	sharedDestroy("/cardume", &cardumes, sizeof(Cardume)*num_cardumes);
+	sharedDestroy("/cardume", cardumes, sizeof(Cardume)*num_cardumes);
 
 }
 
