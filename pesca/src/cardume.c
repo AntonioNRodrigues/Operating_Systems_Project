@@ -21,8 +21,7 @@ static void nadar (int id);
 static bool proximo_outro_cardume (int id);
 static void reproduzir (int id);
 
-static void iniciar_cardume (Cardume *cardume)
-{
+static void iniciar_cardume (Cardume *cardume){
 	int x, y;
 	cardume->estado = P_NADAR;
 	cardume->tamanho = TAMANHO_INICIAL_CARDUME;
