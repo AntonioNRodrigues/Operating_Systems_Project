@@ -50,9 +50,9 @@ int main (int argc, char *argv[])
 	return 0;
 }
 
-void forkCalls(int quant, pid_t *pid_filhos, char *name){
+void forkCalls(int start, int quant, pid_t *pid_filhos, char *name){
 	int i, pid_filho;
-	for (i = 0; i < quant; i++){
+	for (i = start; i < quant; i++){
 		pid_filho = fork();
 		if(pid_filho == -1)
 			exit(-1);
@@ -79,26 +79,25 @@ void forkCalls(int quant, pid_t *pid_filhos, char *name){
 
 void criar_processos (pid_t *pid_filhos){
 	/*lancar processos para os barcos*/
-	forkCalls(num_barcos, pid_filhos, "barco");
+	forkCalls(0, num_barcos, pid_filhos, "barco");
 	/*lancar processos para os cardumes*/
-	forkCalls(num_cardumes, pid_filhos, "cardume");
+	forkCalls(num_barcos, num_cardumes+num_barcos, pid_filhos, "cardume");
 	/*lancar processos para o capitao*/
-	forkCalls(1, pid_filhos, "capitao");
+	forkCalls(num_barcos+num_cardumes, num_cardumes+num_barcos+NUM_CAPITAO, pid_filhos, "capitao");
 }
 
 void esperar_processos (const pid_t *pid_filhos){
-	int i, status, pid;
-	int terminados = 0;
+	int i, status, pid, terminados = 0;
+	
 	while(terminados < NUM_CAPITAO+num_barcos+num_cardumes){
 		pid =  wait(&status);
-
 		for(i=0; i<NUM_CAPITAO+num_cardumes+num_barcos; i++){
 			if(pid == pid_filhos[i]){
 				if(i<num_barcos)
 					printf("Processo filho para (PID=%d) para o barco %d", pid, i%num_barcos);
 				if(i>=num_barcos && i<num_cardumes+num_barcos)
 					printf("Processo filho para (PID=%d) para o cardume %d", pid, i-num_barcos%num_cardumes);
-				if(i>num_cardumes+num_barcos)
+				if(i>=num_cardumes+num_barcos)
 					printf("Processo filho para (PID=%d) para o capitao", pid);
 			}
 		}
