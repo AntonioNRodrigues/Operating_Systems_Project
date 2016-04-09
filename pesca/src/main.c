@@ -69,9 +69,13 @@ void forkCalls(int start, int quant, pid_t *pid_filhos, char *name){
 			}
 			else{
 				pid_filhos[i] = pid_filho;
-				quant == NUM_CAPITAO ? 
-					printf("Lancou o processo filho (PID=%d) para o %s\n", pid_filhos[i], name):
-					printf("Lancou o processo filho (PID=%d) para o %s %d\n", pid_filhos[i], name, i);				
+				if (quant == NUM_CAPITAO+num_barcos+num_cardumes)
+					printf("Lancou o processo filho (PID=%d) para o %s\n", pid_filhos[i], name);
+				else if(start == 0)
+					printf("Lancou o processo filho (PID=%d) para o %s %d\n", pid_filhos[i], name, i);
+				else
+					printf("Lancou o processo filho (PID=%d) para o %s %d\n", pid_filhos[i], name, i-num_barcos);				
+				
 			}
 		}
 	}
