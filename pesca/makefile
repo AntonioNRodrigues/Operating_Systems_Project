@@ -27,11 +27,11 @@ CFLAGS = -iquote $(incdir)
 
 # target to build project executable
 $(bindir)/pesca: $(obj)
-	$(CC) -o $@ $^ $(LDFLAGS) 
+	mkdir -p $(bindir); $(CC) -o $@ $^ $(LDFLAGS) 
 
 # target to buid object files
 $(objdir)/%.o: $(srcdir)/%.c
-	$(CC) $(CFLAGS) -o $@ -c $<
+	mkdir -p $(objdir); $(CC) $(CFLAGS) -o $@ -c $<
 
 # include dependency files in makefile
 -include $(dep)
@@ -42,7 +42,7 @@ $(objdir)/%.o: $(srcdir)/%.c
 
 # target to produce a zip file with the project source files
 archive:
-	zip -r pesca$(GG)$(VV)$(AAAAMMDD).zip src/*.c include 
+	zip -r pesca$(GG)$(VV)$(AAAAMMDD).zip src/*.c include makefile
 
 # remove object files and executable
 .PHONY: clean
