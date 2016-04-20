@@ -69,6 +69,31 @@ typedef struct {
 extern Mundo *mundo;
 
 /**
+ * Semáforo para exclusão mútua no acesso à memória partilhada.
+ */
+extern sem_t *mutex;
+
+/**
+ * Semáforo para sincronização das actividades do capitão.
+ */
+extern sem_t *sem_capitao;
+
+/**
+ * Semáforo para sincronização da saída do cais.
+ */
+extern sem_t *sem_sair_cais;
+
+/**
+* Vector de semáforos para sincronização das actividades dos barcos.
+ */
+extern sem_t **sem_barcos;
+
+/**
+* Vector de semáforos usados na sincronização das actividades dos cardumes.
+ */
+extern sem_t **sem_cardumes;
+
+/**
 * Cria e inicia a memória partilhada que contem o estado do mundo (excepto o
 * estado dos barcos e dos cardumes) e cria e inicia os semáforos.
  */

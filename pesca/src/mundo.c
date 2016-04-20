@@ -14,11 +14,23 @@
 
 Mundo *mundo;
 
+sem_t *mutex;
+
+sem_t *sem_capitao;
+
+sem_t *sem_sair_cais;
+
+sem_t **sem_barcos;
+
+sem_t **sem_cardumes;
+
+FILE *log_mundo;
+
 void iniciar_mundo ()
 {
 	int i, x, y;
 	/* Criar a memória partilhada para o mundo */
-	mundo = (Mundo *) sharedInit("/mundo", sizeof(Mundo));
+	mundo = sharedInit ("shm.pesca-mundo", sizeof (Mundo));
 	/* Inicializar a memória partilhada do mundo */
 	mundo->estado_capitao = C_PLANEAR;
 	for (x = 0; x < DIMENSAO_MAR; x++) {
@@ -32,11 +44,57 @@ void iniciar_mundo ()
 	mundo->barcos_cais = num_barcos;
 	mundo->peixes_cais = 0;
 	mundo->jornadas_pesca = num_jornadas_pesca;
+	/* Criar e inicializar os semáforos */
+	char *nome;
+	int max_digitos;
+
+
+
+	/* ... semáforos dos barcos... */
+
+	max_digitos = log (num_barcos) / log (10) + 1;
+	nome = malloc (strlen ("pesca-barco") + max_digitos + 1);
+
+
+
+
+	free (nome);
+	/* .. semáforos dos cardumes... */
+
+	max_digitos = log (num_cardumes) / log (10) + 1;
+	nome = malloc (strlen ("pesca-cardume") + max_digitos + 1);
+
+
+
+
+	free (nome);
 }
 
 void destruir_mundo ()
 {
-	sharedDestroy("/mundo", mundo, sizeof(Mundo));
+	int i;
+	char *nome;
+	int max_digitos;
+	sharedDestroy ("shm.pesca-mundo", mundo, sizeof (Mundo));
+
+
+
+	max_digitos = log (num_barcos) / log (10) + 1;
+	nome = malloc (strlen ("pesca-barco") + max_digitos + 1);
+
+
+
+
+	free (nome);
+
+	max_digitos = log (num_cardumes) / log (10) + 1;
+	nome = malloc (strlen ("pesca-cardume") + max_digitos + 1);
+
+
+
+
+	free (nome);
+
 }
 
 int barco_posicao_mundo (const Posicao *p)
@@ -67,12 +125,89 @@ void mover_cardume_mundo (int id, const Posicao *np)
 
 void abrir_log_mundo ()
 {
+	int i;
+	log_mundo = fopen ("pesca.log", "w");
+	fprintf (log_mundo, "tempo      ECp Peixe Bc Jn Hora      ");
+	for (i = 0; i < num_barcos; i++) {
+		fprintf (log_mundo, " EBc OBc Dest Posi Peixe");
+	}
+	fprintf (log_mundo, " ");
+	for (i = 0; i < num_cardumes; i++) {
+		fprintf (log_mundo, " ECd Posi Taman");
+	}
+	fprintf (log_mundo, "\n");
+	fflush (log_mundo);
 }
 
 void fechar_log_mundo ()
 {
+	fclose (log_mundo);
+}
+
+static void imprimir_log_mundo ()
+{
+	int i;
+  	fprintf (log_mundo, "%10ld", time (NULL));
+	fprintf (log_mundo, " %s %5d %2d %2d ", ECS [mundo->estado_capitao], mundo->peixes_cais, mundo->barcos_cais, mundo->jornadas_pesca);
+	if (mundo->estado_capitao == C_RECEBER || mundo->estado_capitao == C_AGUARDAR)
+		fprintf (log_mundo, "%10ld", mundo->hora_regressar);
+	else
+		fprintf (log_mundo, "          ");
+	for (i = 0; i < num_barcos; i++) {
+		fprintf (log_mundo, " ");
+		imprimir_barco (log_mundo, barcos + i);
+	}
+	fprintf (log_mundo, " ");
+	for (i = 0; i < num_cardumes; i++) {
+		fprintf (log_mundo, " ");
+		imprimir_cardume (log_mundo, cardumes + i);
+	}
+	fprintf (log_mundo, "\n");
+	fflush (log_mundo);
+}
+
+static void imprimir_bonito_mundo ()
+{
+	int linha;
+  	printf ("%10ld", time (NULL));
+	printf (" %s %5d %2d %2d", ECS [mundo->estado_capitao], mundo->peixes_cais, mundo->barcos_cais, mundo->jornadas_pesca);
+	if (mundo->estado_capitao == C_RECEBER || mundo->estado_capitao == C_AGUARDAR)
+		printf (" %10ld", mundo->hora_regressar);
+	printf ("\n[");
+	fifoPrint (&mundo->espera_barcos);
+	printf ("]\n");
+	int stop = max (num_barcos, max (num_cardumes, DIMENSAO_MAR));
+	linha = 0;
+	while (linha < stop) {
+		if (linha < num_barcos) {
+			printf ("| ");
+			imprimir_barco (stdout, barcos + linha);
+		}
+		else
+			printf ("                         ");
+		printf ((linha < num_barcos || linha < num_cardumes) ? " | " : "   ");
+		if (linha < num_cardumes)
+			imprimir_cardume (stdout, cardumes + linha);
+		else
+			printf ("              ");
+		if (linha < DIMENSAO_MAR) {
+			printf (" |");
+			int col;
+			for (col = 0; col < DIMENSAO_MAR; col++) {
+				static char *pattern[] = {"  ", "Ca", "Ba", "CB"};
+				printf (pattern [
+				    (mundo->mar [col][DIMENSAO_MAR - linha - 1].cardume == VAZIO ? 0 : 1)
+				  + (mundo->mar [col][DIMENSAO_MAR - linha - 1].barco == VAZIO ? 0 : 2)]);
+			}
+			printf ("|");
+		}
+		printf ("\n");
+		linha++;
+	}
 }
 
 void imprimir_mundo ()
 {
+	/* imprimir_bonito_mundo (); */
+	imprimir_log_mundo ();
 }
