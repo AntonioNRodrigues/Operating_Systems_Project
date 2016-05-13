@@ -43,7 +43,7 @@ static void iniciar_barco (Barco *barco)
 void iniciar_barcos ()
 {
 	/* Criar a memória partilhada para os barcos */
-	barcos = sharedInit ("shm.pesca-barcos", num_barcos * sizeof (Barco));
+	barcos = sharedInit ("shm.pesca-barcos5", num_barcos * sizeof (Barco));
 	/* Inicializar a memória partilhada dos barcos */
 	int i;
 	for (i = 0; i < num_barcos; i++) {
@@ -53,7 +53,7 @@ void iniciar_barcos ()
 
 void destruir_barcos ()
 {
-	sharedDestroy ("shm.pesca-barcos", barcos, num_barcos * sizeof (Barco));
+	sharedDestroy ("shm.pesca-barcos5", barcos, num_barcos * sizeof (Barco));
 }
 
 void imprimir_barco (FILE *ficheiro, const Barco *barco)
@@ -75,12 +75,16 @@ void main_barco (int id)
 {
 	bool fim = false;
 	while (!fim) {
+        
+        semDown ("barco", sem_barcos [id]);
+
 		switch (ordem_capitao (id)) {
 		case O_PESCAR:
 			sair_cais (id);
 			while (!chegou_a (id, &barcos [id].destino)) {
 				ir_para (id, &barcos [id].destino);
 			}
+
 			while (!hora_regressar_cais (id)) {
 				if (cardume_detectado (id)) {
 					capturar_peixe (id);
@@ -89,12 +93,15 @@ void main_barco (int id)
 					navegar (id);
 				}
 			}
+
 			while (!chegou_a (id, &posicao_cais)) {
 				ir_para (id, &posicao_cais);
 			}
+                
 			entrar_cais (id);
 			break;
 		case O_FESTEJAR:
+            printf("O barco[%d] vai festejar  \n", id);
 			fim = true;
 			break;
 		case O_NENHUMA:
@@ -105,18 +112,30 @@ void main_barco (int id)
 
 OrdemBarco ordem_capitao (int id)
 {
+    //
+    printf("O barco[%d] recebeu a ordem %d do capitao. \n", id, barcos [id].ordem);
+
 
 	return barcos [id].ordem;
 }
 
 void sair_cais (int id)
 {
+    // Sair - o barco aguarda que a saída do cais esteja livre, para poder sair rumo ao seu destino.
+    // O semáforo implementa um mutex para a saída dos barcos do cais
+    semDown("sair_cais", sem_sair_cais);
 
 	barcos [id].estado = B_DESTINO;
 	barcos [id].posicao = posicao_cais;
 	mundo->mar [posicao_cais.x][posicao_cais.y].barco = id;
-	mundo->barcos_cais--;
-	imprimir_mundo ();
+    mundo->barcos_cais--;
+    imprimir_mundo ();
+
+    // Incrementar o semáforo para permitir a saída do próxio barco
+    semUp("sair_cais", sem_sair_cais);
+    printf("O barco[%d] saiu do cais. \n", id);
+
+ 
 
 }
 
@@ -188,6 +207,7 @@ bool cardume_detectado (int bid)
 
 void capturar_peixe (int bid)
 {
+    
 	usleep (1000000 + random () % 2000000);
 
 	int cid = cardume_posicao_mundo (&barcos [bid].posicao);
@@ -196,8 +216,23 @@ void capturar_peixe (int bid)
 	cardumes [cid].tamanho -= peixe_pescado;
 	barcos [bid].peixe_pescado += peixe_pescado;
 
-	cardumes [cid].estado = P_NADAR;
+    //
+    printf("O barco [%d] capturou %d peixes do cardume [%d] na posição [%d,%d], o cardume ficou com %d peixes \n", bid, peixe_pescado, cid, barcos[bid].posicao.x, barcos[bid].posicao.y, cardumes [cid].tamanho);
+
+    
+    //cardumes [cid].estado = P_NADAR;
+    // Evitar que um cardume com tamanho <= 0 se possa reproduzir
+    if (cardumes [cid].tamanho <= 0)
+        cardumes [cid].estado = P_MORTO;
+    else
+        cardumes [cid].estado = P_NADAR;
+    //
+
 	imprimir_mundo ();
+    
+    // Pescado - o barco recolheu as redes, libertar o cardume preso no semaforo
+    semUp ("cardume", sem_cardumes [cid]);
+
 
 }
 
@@ -222,16 +257,24 @@ void navegar (int id)
 	}
 
 	usleep ((__useconds_t) (3800000 + random () % 1500000));
+
 }
 
 void entrar_cais (int id)
 {
 
+    printf("O barco [%d] entrou no cais\n", id);
+
 	barcos [id].estado = B_DESCARREGAR;
 	barcos [id].ordem = O_NENHUMA;
 	mundo->barcos_cais++;
-
+    
 	mundo->mar [barcos [id].posicao.x][barcos [id].posicao.y].barco = VAZIO;
+    
+    semUp("capitao", sem_capitao);
+    
+    // O semáforo foi incrementado e liberta o processo do capitão que estava à espera
+    
 	fifoPush (&mundo->espera_barcos, id);
 	imprimir_mundo ();
 

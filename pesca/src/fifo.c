@@ -16,6 +16,9 @@ void fifoPush (FIFO *fifo, int element)
 	fifo->data [fifo->pin] = element;
 	fifo->pin = (fifo->pin + 1) % CAPACITY;
 	fifo->size++;
+    
+    //printf("fifoPush: size=%d\n", fifo->size);
+
 }
 
 int fifoPop (FIFO *fifo)

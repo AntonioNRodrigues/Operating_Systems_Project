@@ -48,26 +48,52 @@ void iniciar_mundo ()
 	char *nome;
 	int max_digitos;
 
+    
+    // ... semaforo mutex...
+    mutex = semInit ("mutex", 1);
+    
+    
+    // ... semaforo da saida do cais...
+    sem_sair_cais = semInit ("sair_cais", 1);
 
+    
+    //... semaforo do capitao...
+    sem_capitao = semInit ("capitao", 0);
+    
 
-	/* ... semáforos dos barcos... */
-
+	/* ... semaforos dos barcos... */
 	max_digitos = log (num_barcos) / log (10) + 1;
 	nome = malloc (strlen ("pesca-barco") + max_digitos + 1);
-
-
-
-
+    
+    //
+    sem_barcos = malloc( sizeof(sem_t *)*num_barcos);
+    
+    for (i=0; i<num_barcos; i++) {
+        sprintf (nome, "pesca-barco%0*d", max_digitos, i);
+        printf("semInit: %s\n", nome);
+        sem_barcos[i]=semInit (nome, 0);
+    }
+    //
+    
 	free (nome);
-	/* .. semáforos dos cardumes... */
-
+	
+    /* .. semaforos dos cardumes... */
 	max_digitos = log (num_cardumes) / log (10) + 1;
 	nome = malloc (strlen ("pesca-cardume") + max_digitos + 1);
-
-
-
-
+    
+    //
+    sem_cardumes = malloc( sizeof(sem_t *)*num_cardumes);
+    
+    for (i=0; i<num_cardumes; i++) {
+        sprintf (nome, "pesca-cardume%0*d", max_digitos, i);
+        printf("semInit: %s\n", nome);
+        sem_cardumes[i]=semInit (nome, 0);
+    }
+    //
+    
 	free (nome);
+    
+    
 }
 
 void destruir_mundo ()
@@ -77,23 +103,43 @@ void destruir_mundo ()
 	int max_digitos;
 	sharedDestroy ("shm.pesca-mundo", mundo, sizeof (Mundo));
 
-
-
 	max_digitos = log (num_barcos) / log (10) + 1;
 	nome = malloc (strlen ("pesca-barco") + max_digitos + 1);
 
-
-
-
+    //
+    for (i=0; i<num_barcos; i++) {
+        sprintf (nome, "pesca-barco%0*d", max_digitos, i);
+        printf("semDestroy: %s\n", nome);
+        semDestroy(nome, sem_barcos[i]);
+    }
+    //
+    
 	free (nome);
 
 	max_digitos = log (num_cardumes) / log (10) + 1;
 	nome = malloc (strlen ("pesca-cardume") + max_digitos + 1);
 
-
-
-
+    //
+    for (i=0; i<num_cardumes; i++) {
+        sprintf (nome, "pesca-cardume%0*d", max_digitos, i);
+        printf("semDestroy: %s\n", nome);
+        semDestroy(nome, sem_cardumes[i]);
+    }
+    //
+    
 	free (nome);
+    
+    //
+    printf("semDestroy: capitao\n");
+    semDestroy("capitao", sem_capitao);
+    
+    printf("semDestroy: sair_cais\n");
+    semDestroy("sair_cais", sem_sair_cais);
+    
+    printf("semDestroy: mutex\n");
+    semDestroy("mutex", mutex);
+    //
+
 
 }
 
@@ -209,5 +255,13 @@ static void imprimir_bonito_mundo ()
 void imprimir_mundo ()
 {
 	/* imprimir_bonito_mundo (); */
+    
+    //
+    semDown("mutex", mutex);
+
 	imprimir_log_mundo ();
+    
+    //
+    semUp("mutex", mutex);
+
 }

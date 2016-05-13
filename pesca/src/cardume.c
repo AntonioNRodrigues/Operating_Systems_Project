@@ -97,6 +97,14 @@ void apanhado_rede (int id)
 {
 	if (cardumes [id].estado == P_PESCADO) {
 
+        //
+        printf("O cardume [%d] está a ser pescado\n", id);
+        
+        // Pescado - o cardume está a ser pescado e tem que aguardar até o barco recolher as redes
+        // O Semáforo inicializado a zero faz o processo esperar neste ponto
+        semDown ("cardume", sem_cardumes [id]);
+        // (O processo do barco que capturou o cardume irá libertar o cardume (o que resta dele) depois da recolha das redes)
+
 	}
 }
 
@@ -124,7 +132,8 @@ void nadar (int id)
 		i++;
 	}
 
-	usleep ((__useconds_t) (1200000 + random () % 1500000));
+    usleep ((useconds_t) (1200000 + random () % 1500000));
+
 }
 
 bool proximo_outro_cardume (int id)
@@ -161,8 +170,13 @@ void reproduzir (int id)
 
 		return ;
 	}
+    
 	cardumes [id].tamanho += CRESCIMENTO_CARDUME;
+
+    //
+    printf("O cardume [%d] reproduziu-se na posição [%d,%d], é agora composto por %d peixes \n", id, cardumes [id].posicao.x, cardumes [id].posicao.y , cardumes [id].tamanho);
 	imprimir_mundo ();
 
-	usleep ((__useconds_t) (5000000 + random () % 15000000));
+    usleep ((useconds_t) (5000000 + random () % 15000000));
+
 }

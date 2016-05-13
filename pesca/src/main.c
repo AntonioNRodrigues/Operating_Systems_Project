@@ -30,7 +30,7 @@ int main (int argc, char *argv[])
 	criar_processos (pid_filhos);
 	instalar_rotina_atendimento_sinal ();
 	/* arranque da simulacao */
-	semUp ("pesca-mutex", mutex);
+	//semUp ("pesca-mutex", mutex);
 	printf ("Simulação arrancou\n");
 	esperar_processos (pid_filhos);
 	destruir_mundo ();
@@ -93,11 +93,17 @@ void esperar_processos (const pid_t *pid_filhos)
 	while (terminados < num_barcos + num_cardumes + 1) {
 		pid_t filho;
 		int status;
-		bool terminou;
+		bool terminou=false;
 		filho = wait (&status);
 		if (filho == -1) {
 			perror ("Erro ao esperar por um processo filho");
-			exit (0);
+            // para não andar sempre a alterar o nome dos semaforos
+            destruir_mundo ();
+            destruir_barcos ();
+            destruir_cardumes ();
+            fechar_log_mundo ();
+			//
+            exit (0);
 		}
 		else if (filho == pid_filhos [num_barcos + num_cardumes]) {
 			printf ("Processo filho para o capitão");
