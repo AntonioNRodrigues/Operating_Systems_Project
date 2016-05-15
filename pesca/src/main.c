@@ -20,6 +20,7 @@ static bool tratar_saida_retorno_filho (int status);
 
 int main (int argc, char *argv[])
 {
+	
 	pid_t *pid_filhos;
 	processa_parametros (argc, argv);
 	pid_filhos = malloc (sizeof (pid_t) * (num_barcos + num_cardumes + 1));
