@@ -23,6 +23,13 @@ extern int num_jornadas_pesca;
  */
 extern const Posicao posicao_cais;
 
+
+/**
+ * Nome do ficheiro.
+ */
+extern char *nome_ficheiro;
+
+
 #define DIMENSAO_MAR 10
 
 #define TAMANHO_INICIAL_CARDUME 1000

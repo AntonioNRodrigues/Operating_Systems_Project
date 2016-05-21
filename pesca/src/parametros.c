@@ -10,21 +10,15 @@ int num_cardumes = 20;
 
 int num_jornadas_pesca = 4;
 
-char *nome_ficheiro;
-
 const Posicao posicao_cais = {0, 0};
 
-void processa_parametros (int argc, char *argv[]){
-	// if the user does not insert the name of the file exit and shows the messege
-	if(argv [7] == NULL){
-		fprintf (stderr, "Modo de utilização: %s [-b num_barcos] [-c num_cardumes] [-j num_jornadas_pesca] [nome_file_de_log.bin]\n", argv[0]);
-		exit(EXIT_FAILURE);
+char *nome_ficheiro = "pesca.bin";
 
-	}else{
-		//copies the file to the var nome_ficheiro
-		nome_ficheiro = strdup(argv[7]);
+
+void processa_parametros (int argc, char *argv[])
+{
 	char opt;
-	while ((opt = getopt (argc, argv, "b:c:j:")) != -1) {
+	while ((opt = getopt (argc, argv, "b:c:j:f:")) != -1) {
 		switch (opt) {
 		case 'b':
 			num_barcos = atoi (optarg);
@@ -35,15 +29,14 @@ void processa_parametros (int argc, char *argv[]){
 		case 'j':
 			num_jornadas_pesca = atoi (optarg);
 			break;
+        case 'f':
+            free(nome_ficheiro);
+            nome_ficheiro = optarg;
+            break;
 		default: /* '?' */
-			fprintf (stderr, "Modo de utilização: %s [-b num_barcos] [-c num_cardumes] [-j num_jornadas_pesca]\n",
-			         argv[0]);
+			fprintf (stderr, "Modo de utilização: %s [-b num_barcos] [-c num_cardumes] [-j num_jornadas_pesca] [-f nome_ficheiro]\n", argv[0]);
 			exit (EXIT_FAILURE);
-
 		}
-	}
-	//call the le_parametros() to inicialize the operations on the file
-	//le_parametros(nome_ficheiro);
 	}
 }
 

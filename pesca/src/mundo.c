@@ -7,10 +7,13 @@
 #include "mundo.h"
 #include "barco.h"
 #include "cardume.h"
+#include "parametros.h"
 
 #include "util.h"
 #include "semaphore.h"
 #include "shared.h"
+
+#include <sys/time.h>
 
 Mundo *mundo;
 
@@ -169,7 +172,7 @@ void mover_cardume_mundo (int id, const Posicao *np)
 	cardumes [id].posicao = *np;
 }
 
-void abrir_log_mundo ()
+void _abrir_log_mundo ()
 {
 	int i;
 	log_mundo = fopen ("pesca.log", "w");
@@ -185,12 +188,28 @@ void abrir_log_mundo ()
 	fflush (log_mundo);
 }
 
+void abrir_log_mundo ()
+{
+    log_mundo = fopen (nome_ficheiro, "w");
+    
+    if(fwrite(&num_barcos, sizeof(num_barcos), 1, log_mundo)!=1){
+     perror("Escrita para ficheiro de dados");
+     exit(1);
+     }
+    
+    if(fwrite(&num_cardumes, sizeof(num_cardumes), 1, log_mundo)!=1){
+        perror("Escrita para ficheiro de dados");
+        exit(1);
+    }
+    fflush (log_mundo);
+}
+
 void fechar_log_mundo ()
 {
 	fclose (log_mundo);
 }
 
-static void imprimir_log_mundo ()
+static void _imprimir_log_mundo ()
 {
 	int i;
   	fprintf (log_mundo, "%10ld", time (NULL));
@@ -210,6 +229,40 @@ static void imprimir_log_mundo ()
 	}
 	fprintf (log_mundo, "\n");
 	fflush (log_mundo);
+}
+
+static void imprimir_log_mundo ()
+{
+    struct timeval tempo;
+    int i;
+    
+    gettimeofday(&tempo, NULL);
+    
+    if(fwrite(&tempo.tv_usec, sizeof(tempo.tv_usec), 1, log_mundo)!=1){
+        perror("Escrita para ficheiro de dados");
+        exit(1);
+    }
+    
+    if(fwrite(mundo, sizeof(mundo), 1, log_mundo)!=1){
+        perror("Escrita para ficheiro de dados");
+        exit(1);
+    }
+    
+    for (i = 0; i < num_barcos; i++) {
+        if(fwrite(barcos + i, sizeof(barcos + i), 1, log_mundo)!=1){
+         perror("Escrita para ficheiro de dados");
+         exit(1);
+        }
+    }
+
+    for (i = 0; i < num_cardumes; i++) {
+        if(fwrite(cardumes + i, sizeof(cardumes + i), 1, log_mundo)!=1){
+            perror("Escrita para ficheiro de dados");
+            exit(1);
+        }
+    }
+
+    fflush (log_mundo);
 }
 
 static void imprimir_bonito_mundo ()
