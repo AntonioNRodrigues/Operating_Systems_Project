@@ -18,7 +18,7 @@ char *nome_ficheiro = "pesca.bin";
 void processa_parametros (int argc, char *argv[])
 {
 	char opt;
-	while ((opt = getopt (argc, argv, "b:c:j:f:")) != -1) {
+	while ((opt = getopt (argc, argv, "b:c:j:l:")) != -1) {
 		switch (opt) {
 		case 'b':
 			num_barcos = atoi (optarg);
@@ -29,12 +29,12 @@ void processa_parametros (int argc, char *argv[])
 		case 'j':
 			num_jornadas_pesca = atoi (optarg);
 			break;
-        case 'f':
-            free(nome_ficheiro);
-            nome_ficheiro = optarg;
+        case 'l':
+            //free(nome_ficheiro);
+            nome_ficheiro = strdup(optarg);
             break;
 		default: /* '?' */
-			fprintf (stderr, "Modo de utilização: %s [-b num_barcos] [-c num_cardumes] [-j num_jornadas_pesca] [-f nome_ficheiro]\n", argv[0]);
+			fprintf (stderr, "Modo de utilização: %s [-b num_barcos] [-c num_cardumes] [-j num_jornadas_pesca] [-l nome_ficheiro]\n", argv[0]);
 			exit (EXIT_FAILURE);
 		}
 	}

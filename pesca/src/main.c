@@ -18,7 +18,7 @@ static void esperar_processos (const pid_t *pid_filhos);
 static void instalar_rotina_atendimento_sinal ();
 static bool tratar_saida_retorno_filho (int status);
 
-/*int main (int argc, char *argv[])
+int main (int argc, char *argv[])
 {
 	
 	pid_t *pid_filhos;
@@ -32,7 +32,7 @@ static bool tratar_saida_retorno_filho (int status);
 	instalar_rotina_atendimento_sinal ();
 	/* arranque da simulacao */
 	//semUp ("pesca-mutex", mutex);
-/*	printf ("Simulação arrancou\n");
+	printf ("Simulação arrancou\n");
 	esperar_processos (pid_filhos);
 	destruir_mundo ();
 	destruir_barcos ();
@@ -41,7 +41,7 @@ static bool tratar_saida_retorno_filho (int status);
 	free (pid_filhos);
 	return 0;
 }
-*/
+
 void criar_processos (pid_t *pid_filhos)
 {
 	int i;

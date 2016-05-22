@@ -239,10 +239,11 @@ static void imprimir_log_mundo ()
     gettimeofday(&tempo, NULL);
     
     if(fwrite(&tempo.tv_usec, sizeof(tempo.tv_usec), 1, log_mundo)!=1){
+
         perror("Escrita para ficheiro de dados");
         exit(1);
     }
-    
+ 
     if(fwrite(mundo, sizeof(mundo), 1, log_mundo)!=1){
         perror("Escrita para ficheiro de dados");
         exit(1);
