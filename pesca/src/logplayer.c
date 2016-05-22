@@ -12,31 +12,8 @@
 
 int counter = 0;
 int velocidade = 100;
-struct itimerval itv;
 char *nameFile = "pesca-2.bin";
 
-int main (int argc, char *argv[]){
-
-	processa_parametros_logPlayer(argc, argv);
-	// TESTES -->DELETE AFTER
-	printf("velocidade:: %d\n", velocidade);
-	printf("namefile:: %s\n", nameFile);
-
-	//configTimer();
-	//instalar_rotina_atendimento_sinal_ ();
-	lerFile();
-
-
-	return 0;
-}
-void configTimer(){
-	itv.it_interval.tv_sec = 5; // 
-
-	itv.it_value.tv_sec = 10; //
-
-	setitimer (ITIMER_REAL, &itv, 0);
-	
-}
 void processa_parametros_logPlayer(int argc, char *argv[]){
 
 	char opt;
@@ -61,6 +38,7 @@ void kill_logPlayer(){
 		printf("%s %d\n", "counter is runing", counter);	
 		counter++;
 	}else{
+		//CLOSE FILE
 		exit(1);
 	}
 
@@ -106,25 +84,60 @@ void lerFile(){
 
 	//read 8 bytes for the tempo
 	while(fread(&tempo, 8, 1, ficheiro)==1){
-		printf("%d \n", tempo);
+		printf("TEMPO %10ld \n", time (NULL));
 		
-  
- 	
  	//read sizeof Mundo bytes for the Mundo
  	fread (&mundo, sizeof(mundo), 1, ficheiro);
  	printf("MUNDO %d \n", mundo);
-
+ 		
  	//read for each barco and fill the barcos[] 
  	for (int i = 0; i < numBarcos; i++){
 		fread(&barcos[i], sizeof(Barco), 1, ficheiro);				
- 		printf("BARCO %d\n", barcos[i]);
+ 		printf("BARCO %d %d\n", i, barcos[i].peixe_pescado);
+ 		
  	}
 
- 	//read for each barco the fill the cardumes[] 
+ 	//read for each barco and fill the cardumes[] 
  	for (int i = 0; i < numCardumes; i++){
  		fread(&cardumes[i], sizeof(Cardume), 1, ficheiro);
- 		printf("CARDUME %d\n",  cardumes[i]);
+ 		printf("CARDUME %d %d\n",  i, cardumes[i].tamanho);
+ 		
  	}
+ 	sleep(10);
  }
+	 fclose(ficheiro);
+	 exit(-1);
+}
+
+void setSpeed(){
+	sleep(1*velocidade/100);
 }
 	
+int main (int argc, char *argv[]){
+
+	processa_parametros_logPlayer(argc, argv);
+
+	struct itimerval itv;
+	
+	//signal(SIGALRM, lerFile);
+	
+	itv.it_interval.tv_sec = 5; // 
+	itv.it_interval.tv_usec = 119; // 
+
+	itv.it_value.tv_sec = 10; //
+	itv.it_value.tv_usec = 0; //
+
+	//setitimer (ITIMER_REAL, &itv, 0);
+	
+	// TESTES -->DELETE AFTER
+	printf("velocidade:: %d\n", velocidade);
+	printf("namefile:: %s\n", nameFile);
+
+	instalar_rotina_atendimento_sinal_ ();
+	lerFile();
+	/*while (1) {
+		sleep (2);
+	}
+*/
+	return 0;
+}
