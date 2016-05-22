@@ -243,13 +243,14 @@ static void imprimir_log_mundo ()
         perror("Escrita para ficheiro de dados");
         exit(1);
     }
- 
+ 	printf("%s\n", tempo.tv_usec);
     if(fwrite(mundo, sizeof(mundo), 1, log_mundo)!=1){
         perror("Escrita para ficheiro de dados");
         exit(1);
     }
     
     for (i = 0; i < num_barcos; i++) {
+    	printf("%s\n", barcos + i);
         if(fwrite(barcos + i, sizeof(barcos + i), 1, log_mundo)!=1){
          perror("Escrita para ficheiro de dados");
          exit(1);
@@ -257,6 +258,7 @@ static void imprimir_log_mundo ()
     }
 
     for (i = 0; i < num_cardumes; i++) {
+    	printf("%s\n", cardumes + i);
         if(fwrite(cardumes + i, sizeof(cardumes + i), 1, log_mundo)!=1){
             perror("Escrita para ficheiro de dados");
             exit(1);

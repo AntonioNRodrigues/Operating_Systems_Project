@@ -15,8 +15,7 @@ int velocidade = 100;
 struct itimerval itv;
 char *nameFile = "pesca-2.bin";
 
-/*int main(int argc, char const *argv[])
-{
+int main (int argc, char *argv[]){
 
 	processa_parametros_logPlayer(argc, argv);
 	// TESTES -->DELETE AFTER
@@ -26,14 +25,10 @@ char *nameFile = "pesca-2.bin";
 	//configTimer();
 	//instalar_rotina_atendimento_sinal_ ();
 	lerFile();
-	
-	while(1){
-		sleep(5);
-		printf("%s\n", "NO SIGINT");
-	}
+
 
 	return 0;
-}*/
+}
 void configTimer(){
 	itv.it_interval.tv_sec = 5; // 
 
@@ -107,26 +102,29 @@ void lerFile(){
 	barcos = (Barco *) malloc (sizeof(Barco) * numBarcos);
 	cardumes = (Cardume *) malloc (sizeof(Cardume) * numCardumes);
 	
-		//build a loop until the end of file---------------------------
+//build a loop until the end of file---------------------------
 
 	//read 8 bytes for the tempo
-	fread(&tempo, 8, 1, ficheiro);
-  	printf("%d \n", tempo);
+	while(fread(&tempo, 8, 1, ficheiro)==1){
+		printf("%d \n", tempo);
+		
+  
  	
  	//read sizeof Mundo bytes for the Mundo
  	fread (&mundo, sizeof(mundo), 1, ficheiro);
- 	printf("%d \n", mundo);
+ 	printf("MUNDO %d \n", mundo);
 
  	//read for each barco and fill the barcos[] 
  	for (int i = 0; i < numBarcos; i++){
- 		fread(&barcos+sizeof(Barco), sizeof(Barco), 1, ficheiro);
- 	printf("%d\n", barcos[i]);
+		fread(&barcos[i], sizeof(Barco), 1, ficheiro);				
+ 		printf("BARCO %d\n", barcos[i]);
  	}
 
  	//read for each barco the fill the cardumes[] 
  	for (int i = 0; i < numCardumes; i++){
- 		fread(&cardumes+sizeof(Cardume), sizeof(Cardume), 1, ficheiro);
- 		printf("%d\n",  cardumes[i]);
+ 		fread(&cardumes[i], sizeof(Cardume), 1, ficheiro);
+ 		printf("CARDUME %d\n",  cardumes[i]);
  	}
+ }
 }
 	
