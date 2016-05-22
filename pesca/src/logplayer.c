@@ -12,8 +12,11 @@
 
 int counter = 0;
 int velocidade = 100;
-char *nameFile = "pesca-2.bin";
-
+char *nameFile = "pesca.bin";
+struct itimerval itv;
+/*
+* function to process the parametros
+*/
 void processa_parametros_logPlayer(int argc, char *argv[]){
 
 	char opt;
@@ -29,37 +32,56 @@ void processa_parametros_logPlayer(int argc, char *argv[]){
 			fprintf (stderr, "Modo de utilização: %s [-l name_file] [-v velocidade] \n",
 			         argv[0]);
 			exit (EXIT_FAILURE);
-		}
+	}
 	}
 }
+/*
+* function to terminate the program if the user sends a SIGINT 3 times 
+* withing 10 seconds 
+*/
+void kill_logPlayer(int sig){
 
-void kill_logPlayer(){
-	if(counter < 2){
-		printf("%s %d\n", "counter is runing", counter);	
+	// first ctrl-c 
+	if(sig == SIGINT && counter == 0){
+		counter ++;
+		setTimer();
+		printf("%s %d\n", "First turn counter is runing", counter);
+	//3 ctrl-c	
+	}else if(sig == SIGINT && counter == 2){
+		printf("%s %d\n", " Exit with 3 Ctrl-c used withing 10 sec", counter);
+		exit(-1);
+	//
+	}else if(sig == SIGINT && counter <= 1 ){
 		counter++;
-	}else{
-		//CLOSE FILE
-		exit(1);
-	}
-
-}
-void instalar_rotina_atendimento_sinal_ (){
-	struct sigaction action;
-	action.sa_handler = kill_logPlayer;
-	//sigemptyset (&action.sa_mask);
-	action.sa_flags = 0;
-	//action.si_timerid;
-	if (sigaction (SIGINT, &action, NULL) != 0) {
-		perror ("Erro ao instalar rotina de atendimento de sinal");
-		exit (1);
+		printf("%s %d\n", "Ctrl-c used --> Counter is runing", counter);
+	//	SIGALRM and the count is not 2
+	}else if(sig == SIGALRM && counter < 3){
+		counter = 0;
+		printf("%s\n", " Timer expire ");
 	}
 }
+/*
+* function to initialize the timer to be generated only one time and to expire 
+* within 10 secs
+*/
+void setTimer(){
 
-void lerFile(){
+	// the signal is generated only one time
+	itv.it_interval.tv_sec = 0;  
+	//This is the period between now and the first timer interrupt. 
+	itv.it_value.tv_sec = 10; 
+
+	setitimer (ITIMER_REAL, &itv, 0);
 	
+}
+/*
+* function to read the file and to print it to the cmd line
+*/
+void lerFile(){
+		
 	FILE *ficheiro;
 	int numBarcos, numCardumes;
-	struct timeval  tempo;
+	struct timeval tempo;
 	Mundo *mundo = (Mundo *) malloc (sizeof(Mundo));
 	Barco *barcos;
 	Cardume *cardumes;
@@ -71,7 +93,7 @@ void lerFile(){
 	}
 	//read 4 bytes for the numBarcos
 	fread(&numBarcos, 4, 1, ficheiro);
-	//read 4 bytes for the numcardumes
+	//read 4 bytes for the numCardumes
 	fread(&numCardumes, 4, 1, ficheiro);  
 	
 	printf("%d\n", numBarcos);
@@ -79,65 +101,50 @@ void lerFile(){
 	
 	barcos = (Barco *) malloc (sizeof(Barco) * numBarcos);
 	cardumes = (Cardume *) malloc (sizeof(Cardume) * numCardumes);
-	
-//build a loop until the end of file---------------------------
 
 	//read 8 bytes for the tempo
 	while(fread(&tempo, 8, 1, ficheiro)==1){
 		printf("TEMPO %10ld \n", time (NULL));
 		
- 	//read sizeof Mundo bytes for the Mundo
- 	fread (&mundo, sizeof(mundo), 1, ficheiro);
- 	printf("MUNDO %d \n", mundo);
+ 		//read sizeof Mundo bytes for the Mundo
+ 		fread (&mundo, sizeof(mundo), 1, ficheiro);
+ 		printf("MUNDO %d \n", mundo);
  		
- 	//read for each barco and fill the barcos[] 
- 	for (int i = 0; i < numBarcos; i++){
-		fread(&barcos[i], sizeof(Barco), 1, ficheiro);				
- 		printf("BARCO %d %d\n", i, barcos[i].peixe_pescado);
- 		
- 	}
+ 		//read for each barco and fill the barcos[] 
+ 		for (int i = 0; i < numBarcos; i++){
+			fread(&barcos[i], sizeof(Barco), 1, ficheiro);				
+ 			printf("BARCO %d %d\n", i, barcos[i].peixe_pescado);
+ 		}
 
- 	//read for each barco and fill the cardumes[] 
- 	for (int i = 0; i < numCardumes; i++){
- 		fread(&cardumes[i], sizeof(Cardume), 1, ficheiro);
- 		printf("CARDUME %d %d\n",  i, cardumes[i].tamanho);
+ 		//read for each barco and fill the cardumes[] 
+ 		for (int i = 0; i < numCardumes; i++){
+ 			fread(&cardumes[i], sizeof(Cardume), 1, ficheiro);
+ 			printf("CARDUME %d %d\n",  i, cardumes[i].tamanho);
  		
+ 		}
  	}
- 	sleep(10);
- }
 	 fclose(ficheiro);
 	 exit(-1);
 }
 
+/*
+* set the speed for giving the output
+*/
 void setSpeed(){
 	sleep(1*velocidade/100);
 }
-	
+/*
+* main function
+*/	
 int main (int argc, char *argv[]){
 
 	processa_parametros_logPlayer(argc, argv);
 
-	struct itimerval itv;
-	
-	//signal(SIGALRM, lerFile);
-	
-	itv.it_interval.tv_sec = 5; // 
-	itv.it_interval.tv_usec = 119; // 
+	signal(SIGINT, kill_logPlayer);
 
-	itv.it_value.tv_sec = 10; //
-	itv.it_value.tv_usec = 0; //
+	signal(SIGALRM, kill_logPlayer);
 
-	//setitimer (ITIMER_REAL, &itv, 0);
-	
-	// TESTES -->DELETE AFTER
-	printf("velocidade:: %d\n", velocidade);
-	printf("namefile:: %s\n", nameFile);
-
-	instalar_rotina_atendimento_sinal_ ();
 	lerFile();
-	/*while (1) {
-		sleep (2);
-	}
-*/
+
 	return 0;
 }
