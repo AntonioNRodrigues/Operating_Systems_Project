@@ -81,7 +81,8 @@ void lerFile(){
 		
 	FILE *ficheiro;
 	int numBarcos, numCardumes;
-	struct timeval tempo;
+	struct timeval t0;
+	struct timeval t1;
 	Mundo *mundo = (Mundo *) malloc (sizeof(Mundo));
 	Barco *barcos;
 	Cardume *cardumes;
@@ -98,13 +99,15 @@ void lerFile(){
 	
 	printf("%d\n", numBarcos);
 	printf("%d\n", numCardumes);
-	
+	t1.tv_sec = 0;
+
 	barcos = (Barco *) malloc (sizeof(Barco) * numBarcos);
 	cardumes = (Cardume *) malloc (sizeof(Cardume) * numCardumes);
 
 	//read 8 bytes for the tempo
-	while(fread(&tempo, 8, 1, ficheiro)==1){
-		printf("TEMPO %10ld \n", time (NULL));
+	while(fread(&t0, sizeof(struct timeval), 1, ficheiro)==1){
+
+		printf("TEMPO %10ld \n", t0);
 		
  		//read sizeof Mundo bytes for the Mundo
  		fread (&mundo, sizeof(mundo), 1, ficheiro);
@@ -130,8 +133,9 @@ void lerFile(){
 /*
 * set the speed for giving the output
 */
-void setSpeed(){
-	sleep(1*velocidade/100);
+int setSpeed(struct timeval t0, struct timeval t1){
+	
+	return (t0.tv_sec - t1.tv_sec)/velocidade;
 }
 /*
 * main function
