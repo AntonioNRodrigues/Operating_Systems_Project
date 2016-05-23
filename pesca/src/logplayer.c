@@ -88,7 +88,7 @@ void lerFile(){
 	
 	ficheiro = fopen(nameFile, "r");
 	if (ficheiro == NULL) {
-		perror ("cria_file()");
+		perror ("file does not exists");
 		exit (1);
 	}
 	//read 4 bytes for the numBarcos
