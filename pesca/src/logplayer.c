@@ -105,7 +105,7 @@ void lerFile(){
 	cardumes = (Cardume *) malloc (sizeof(Cardume) * numCardumes);
 
 	//read 8 bytes for the tempo
-	while(fread(&t0, sizeof(struct timeval), 1, ficheiro)==1){
+	while(fread(&t0, 8, 1, ficheiro)==1){
 
 		printf("TEMPO %10ld \n", t0);
 		
